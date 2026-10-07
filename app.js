@@ -59,6 +59,7 @@
 
   function load(entry) {
     current = entry;
+    stopSpeaking();
     target = normalize(entry.text);
     $("entry-date").textContent = entry.date;
     $("entry-title").textContent = entry.title || "Daily update";
@@ -69,9 +70,22 @@
     // 中英段落數一致才逐段顯示，否則整段翻譯放在最後
     const perPara = zh.length === paraCount;
     let para = 0;
+    const paragraphs = target.split("\n");
+    let paraIndex = 0;
     const paraEnd = (text) => {
       const div = document.createElement("div");
       div.className = "pe";
+      if (tts) {
+        const btn = document.createElement("button");
+        btn.className = "say";
+        btn.textContent = "▶ 朗讀這段";
+        const sentence = paragraphs[paraIndex++];
+        btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          speak([sentence], btn);
+        });
+        div.appendChild(btn);
+      }
       if (text) {
         const z = document.createElement("div");
         z.className = "zh";
@@ -101,6 +115,61 @@
     $("zh-label").classList.toggle("disabled", zh.length === 0);
     $("zh").disabled = zh.length === 0;
     reset();
+  }
+
+  // ---- 朗讀 (Web Speech API) ----
+  const tts = "speechSynthesis" in window ? window.speechSynthesis : null;
+  let speakingBtn = null;
+
+  function englishVoice() {
+    const voices = tts.getVoices().filter((v) => /^en[-_]/i.test(v.lang));
+    return (
+      voices.find((v) => /en[-_]US/i.test(v.lang) && /Samantha|Google|Natural|Aria|Jenny/i.test(v.name)) ||
+      voices.find((v) => /en[-_]US/i.test(v.lang)) ||
+      voices[0] ||
+      null
+    );
+  }
+
+  function stopSpeaking() {
+    if (!tts) return;
+    tts.cancel();
+    if (speakingBtn) {
+      speakingBtn.classList.remove("playing");
+      speakingBtn.textContent = speakingBtn.dataset.label;
+    }
+    speakingBtn = null;
+  }
+
+  // 依句子切開排隊播放，避免 Chrome 長句朗讀到一半中斷
+  function speak(paragraphs, btn) {
+    if (!tts) return;
+    const wasSame = speakingBtn === btn;
+    stopSpeaking();
+    if (wasSame) return; // 再按一次 = 停止
+
+    const sentences = paragraphs
+      .flatMap((p) => p.split(/(?<=[.!?])\s+(?=[A-Z"'])/))
+      .filter((x) => x.trim());
+    if (!sentences.length) return;
+
+    speakingBtn = btn;
+    btn.dataset.label = btn.dataset.label || btn.textContent;
+    btn.textContent = "■ 停止";
+    btn.classList.add("playing");
+
+    const voice = englishVoice();
+    const rate = Number($("rate").value) || 1;
+    sentences.forEach((text, i) => {
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = voice ? voice.lang : "en-US";
+      if (voice) u.voice = voice;
+      u.rate = rate;
+      if (i === sentences.length - 1) {
+        u.onend = () => { if (speakingBtn === btn) stopSpeaking(); };
+      }
+      tts.speak(u);
+    });
   }
 
   function reset() {
@@ -211,6 +280,15 @@
   inputEl.addEventListener("focus", () => boardEl.classList.add("focused"));
   inputEl.addEventListener("blur", () => boardEl.classList.remove("focused"));
   $("restart").addEventListener("click", reset);
+  if (tts) {
+    tts.getVoices(); // 部分瀏覽器要先呼叫才會載入語音
+    const savedRate = storageGet("typing-rate");
+    if (savedRate) $("rate").value = savedRate;
+    $("rate").addEventListener("change", (e) => storageSet("typing-rate", e.target.value));
+    $("speak-all").addEventListener("click", (e) => speak(target.split("\n"), e.currentTarget));
+  } else {
+    $("tts").hidden = true;
+  }
   $("zh").checked = storageGet("typing-show-zh") === "1";
   textEl.classList.toggle("show-zh", $("zh").checked);
   $("zh").addEventListener("change", (e) => {

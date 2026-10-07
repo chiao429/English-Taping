@@ -22,6 +22,15 @@
         <div class="controls">
           <label id="zh-label"><input type="checkbox" id="zh"> 顯示中文</label>
           <label><input type="checkbox" id="blind"> 隱藏原文</label>
+          <span id="tts" class="tts">
+            <button id="speak-all" class="secondary">▶ 朗讀全文</button>
+            <select id="rate" title="朗讀速度">
+              <option value="0.7">0.7x</option>
+              <option value="0.85">0.85x</option>
+              <option value="1" selected>1x</option>
+              <option value="1.15">1.15x</option>
+            </select>
+          </span>
           <button id="restart" title="Esc">重新開始</button>
         </div>
       </header>
