@@ -9,6 +9,7 @@
   --wrong-bg: #fde3e3;
   --accent: #3b6fd8;
   --border: #e4e2dc;
+  --hover: #e3ebfb;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
@@ -22,6 +23,7 @@
     --wrong-bg: #4a2a2a;
     --accent: #7aa2ff;
     --border: #35363b;
+  --hover: #2d3550;
     color-scheme: dark;
   }
 }
@@ -36,6 +38,7 @@
   --wrong-bg: #4a2a2a;
   --accent: #7aa2ff;
   --border: #35363b;
+  --hover: #2d3550;
   color-scheme: dark;
 }
 
@@ -147,6 +150,10 @@ select {
 .text span.bad { color: var(--wrong); background: var(--wrong-bg); border-radius: 2px; }
 .text span.cur { box-shadow: inset 2px 0 0 var(--accent); }
 .text span.nl { color: var(--pending); opacity: .6; }
+.text b.w { font-weight: inherit; border-radius: 3px; }
+.text.word-mode b.w { cursor: pointer; }
+.text.word-mode b.w:hover { background: var(--hover); }
+.text b.w.speaking { background: var(--hover); box-shadow: 0 0 0 1px var(--accent); }
 .text .pe { padding-bottom: 0.9em; }
 .text .pe:last-child { padding-bottom: 0; }
 .text .zh {

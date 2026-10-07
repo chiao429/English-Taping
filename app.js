@@ -97,8 +97,28 @@
 
     textEl.innerHTML = "";
     spans = [];
-    for (const ch of target) {
+    // 找出每個單字的範圍（含 p.m. 這類縮寫），單字模式點擊用
+    const wordEnd = new Map();
+    for (const m of target.matchAll(/(?:[A-Za-z]\.){2,}|[A-Za-z0-9'-]+/g)) {
+      wordEnd.set(m.index, m.index + m[0].length);
+    }
+    let word = null;
+    let end = -1;
+    target.split("").forEach((ch, i) => {
       const span = document.createElement("span");
+      if (wordEnd.has(i)) {
+        word = document.createElement("b");
+        word.className = "w";
+        textEl.appendChild(word);
+        end = wordEnd.get(i);
+      }
+      if (word && i < end) {
+        span.textContent = ch;
+        word.appendChild(span);
+        spans.push(span);
+        return;
+      }
+      word = null;
       if (ch === "\n") {
         span.textContent = "↵";
         span.className = "nl";
@@ -110,7 +130,7 @@
         textEl.appendChild(span);
       }
       spans.push(span);
-    }
+    });
     paraEnd(perPara ? zh[para] : zh.join("\n\n"));
     $("zh-label").classList.toggle("disabled", zh.length === 0);
     $("zh").disabled = zh.length === 0;
@@ -170,6 +190,20 @@
       }
       tts.speak(u);
     });
+  }
+
+  function speakWord(el) {
+    const text = el.textContent.replace(/^['-]+|['-]+$/g, "");
+    if (!tts || !text) return;
+    stopSpeaking();
+    const voice = englishVoice();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = voice ? voice.lang : "en-US";
+    if (voice) u.voice = voice;
+    u.rate = Number($("rate").value) || 1;
+    el.classList.add("speaking");
+    u.onend = u.onerror = () => el.classList.remove("speaking");
+    tts.speak(u);
   }
 
   function reset() {
@@ -285,9 +319,21 @@
     const savedRate = storageGet("typing-rate");
     if (savedRate) $("rate").value = savedRate;
     $("rate").addEventListener("change", (e) => storageSet("typing-rate", e.target.value));
+    $("word").checked = storageGet("typing-word-mode") === "1";
+    textEl.classList.toggle("word-mode", $("word").checked);
+    $("word").addEventListener("change", (e) => {
+      textEl.classList.toggle("word-mode", e.target.checked);
+      storageSet("typing-word-mode", e.target.checked ? "1" : "0");
+      inputEl.focus();
+    });
+    textEl.addEventListener("click", (e) => {
+      const w = $("word").checked && e.target.closest(".w");
+      if (w) speakWord(w);
+    });
     $("speak-all").addEventListener("click", (e) => speak(target.split("\n"), e.currentTarget));
   } else {
     $("tts").hidden = true;
+    $("word-label").hidden = true;
   }
   $("zh").checked = storageGet("typing-show-zh") === "1";
   textEl.classList.toggle("show-zh", $("zh").checked);
