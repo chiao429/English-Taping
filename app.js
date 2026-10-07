@@ -64,6 +64,23 @@
     $("entry-title").textContent = entry.title || "Daily update";
     [...listEl.children].forEach((li) => li.classList.toggle("active", li.dataset.date === entry.date));
 
+    const zh = (entry.translation ? normalize(entry.translation).split("\n") : []);
+    const paraCount = target.split("\n").length;
+    // 中英段落數一致才逐段顯示，否則整段翻譯放在最後
+    const perPara = zh.length === paraCount;
+    let para = 0;
+    const paraEnd = (text) => {
+      const div = document.createElement("div");
+      div.className = "pe";
+      if (text) {
+        const z = document.createElement("div");
+        z.className = "zh";
+        z.textContent = text;
+        div.appendChild(z);
+      }
+      textEl.appendChild(div);
+    };
+
     textEl.innerHTML = "";
     spans = [];
     for (const ch of target) {
@@ -72,13 +89,17 @@
         span.textContent = "↵";
         span.className = "nl";
         textEl.appendChild(span);
-        textEl.appendChild(document.createTextNode("\n\n"));
+        paraEnd(perPara ? zh[para] : "");
+        para++;
       } else {
         span.textContent = ch;
         textEl.appendChild(span);
       }
       spans.push(span);
     }
+    paraEnd(perPara ? zh[para] : zh.join("\n\n"));
+    $("zh-label").classList.toggle("disabled", zh.length === 0);
+    $("zh").disabled = zh.length === 0;
     reset();
   }
 
@@ -190,6 +211,13 @@
   inputEl.addEventListener("focus", () => boardEl.classList.add("focused"));
   inputEl.addEventListener("blur", () => boardEl.classList.remove("focused"));
   $("restart").addEventListener("click", reset);
+  $("zh").checked = storageGet("typing-show-zh") === "1";
+  textEl.classList.toggle("show-zh", $("zh").checked);
+  $("zh").addEventListener("change", (e) => {
+    textEl.classList.toggle("show-zh", e.target.checked);
+    storageSet("typing-show-zh", e.target.checked ? "1" : "0");
+    inputEl.focus();
+  });
   $("blind").addEventListener("change", (e) => {
     textEl.classList.toggle("blind", e.target.checked);
     inputEl.focus();

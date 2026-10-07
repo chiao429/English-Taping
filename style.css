@@ -121,6 +121,19 @@ button {
 .text span.bad { color: var(--wrong); background: var(--wrong-bg); border-radius: 2px; }
 .text span.cur { box-shadow: inset 2px 0 0 var(--accent); }
 .text span.nl { color: var(--pending); opacity: .6; }
+.text .pe { padding-bottom: 0.9em; }
+.text .pe:last-child { padding-bottom: 0; }
+.text .zh {
+  display: none;
+  margin-top: 4px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", sans-serif;
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--muted);
+  white-space: normal;
+}
+.text.show-zh .zh { display: block; }
+label.disabled { opacity: .4; }
 .text.blind span:not(.ok):not(.bad):not(.nl) { color: transparent; }
 .text.blind span.nl:not(.ok):not(.bad) { opacity: 0; }
 
