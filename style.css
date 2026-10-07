@@ -11,7 +11,7 @@
   --border: #e4e2dc;
 }
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     --bg: #1c1d20;
     --panel: #25262a;
     --text: #e6e6e6;
@@ -22,7 +22,21 @@
     --wrong-bg: #4a2a2a;
     --accent: #7aa2ff;
     --border: #35363b;
+    color-scheme: dark;
   }
+}
+:root[data-theme="dark"] {
+  --bg: #1c1d20;
+  --panel: #25262a;
+  --text: #e6e6e6;
+  --muted: #8a8a8a;
+  --pending: #5f6066;
+  --correct: #e6e6e6;
+  --wrong: #ff6b6b;
+  --wrong-bg: #4a2a2a;
+  --accent: #7aa2ff;
+  --border: #35363b;
+  color-scheme: dark;
 }
 
 * { box-sizing: border-box; }
@@ -135,5 +149,6 @@ button {
   #entry-list { display: flex; gap: 6px; overflow-x: auto; }
   #entry-list li { flex-shrink: 0; }
   main { padding: 16px; }
+  .sidebar { padding: 16px; }
   .text { font-size: 16px; }
 }
