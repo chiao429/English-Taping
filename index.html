@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>English Typing</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <h1>English Typing</h1>
+      <ul id="entry-list"></ul>
+    </aside>
+
+    <main>
+      <header class="toolbar">
+        <div>
+          <div id="entry-date" class="date"></div>
+          <h2 id="entry-title"></h2>
+        </div>
+        <div class="controls">
+          <label><input type="checkbox" id="blind"> 隱藏原文</label>
+          <button id="restart" title="Esc">重新開始</button>
+        </div>
+      </header>
+
+      <section class="stats">
+        <div><span id="wpm">0</span><small>WPM</small></div>
+        <div><span id="accuracy">100%</span><small>正確率</small></div>
+        <div><span id="time">0:00</span><small>時間</small></div>
+        <div><span id="progress">0%</span><small>進度</small></div>
+        <div><span id="best">—</span><small>最佳 WPM</small></div>
+      </section>
+
+      <section id="board" class="board" tabindex="0">
+        <div id="text" class="text"></div>
+        <textarea id="input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+        <div id="hint" class="hint">點這裡開始打字・段落結尾按 Enter・Esc 重新開始</div>
+      </section>
+
+      <div id="done" class="done" hidden></div>
+    </main>
+  </div>
+
+  <script src="entries.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
